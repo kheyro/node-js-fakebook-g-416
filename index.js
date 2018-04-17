@@ -40,6 +40,7 @@ console.log(`Running in environment: ${ENV}`);
 const Comment = require('./models/comment');
 const Post = require('./models/post');
 const User = require('./models/user');
+const Follower = require('./models/follower');
 
 /// ***** Passport Strategies & Helpers ***** //
 
@@ -87,6 +88,21 @@ const isAuthenticated = (req, res, done) => {
 };
 
 // ***** Server ***** //
+
+app.get('/follower/:id', isAuthenticated, (req,res) => {
+  User
+    .forge({id: req.params.id})
+    .fetch()
+    .then((usr) => {
+      if (_.isEmpty(usr))
+        return res.sendStatus(404);
+      res.send([usr.id]);
+    })
+    .catch((error) => {
+      console.error(error);
+      return res.sendStatus(500);
+    });
+});
 
 app.get('/user/:id', isAuthenticated, (req,res) => {
   User

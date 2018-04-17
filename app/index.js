@@ -88,6 +88,66 @@ const isAuthenticated = (req, res, done) => {
 
 // ***** Server ***** //
 
+app.get('/', isAuthenticated, (req, res) => {
+  const followedIds = _.map(req.user.related('following').models, 'id');
+  let queryObj = {};
+  followedIds.forEach((id, idx) => {
+    queryObj[(idx === 0) ? 'where' : 'orWhere'] = {'author' : id};
+  });
+  // queryObj wrong as orWhere property will get overriden
+  Post
+    .query(queryObj)
+    .orderBy('-created_at')
+    .fetchAll({withRelated: ['author']})
+    .then((results) => {
+      // if(results) console.log(_.map(results.models, v => { return JSON.stringify(v); }));
+      res.send(results);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.sendStatus(500);
+    });
+});
+
+app.get('/follow/:id', isAuthenticated, (req, res) => {
+  let currUserId = req.user.id;
+  User
+    .forge({id: req.params.id})
+    .fetch()
+    .then((usr) => {
+      if (_.isEmpty(usr))
+        return res.sendStatus(404);
+      return User.forge({id: currUserId}).following().attach([usr]);
+    })
+    .then((usr) => {
+      res.send(_.map(usr.models, 'id'));
+    })
+    .catch((error) => {
+      console.error(error);
+      return res.sendStatus(500);
+    });
+});
+
+app.get('/unfollow/:id', isAuthenticated, (req, res) => {
+  let currUserId = req.user.id;
+  User
+    .forge({id: req.params.id})
+    .fetch()
+    .then((usr) => {
+      if (_.isEmpty(usr))
+        return res.sendStatus(404);
+      return User.forge({id: currUserId}).following().detach([usr]);
+    })
+    .then((usr) => {
+      res.send(_.map(usr.models, 'id'));
+    })
+    .catch((error) => {
+      console.error(error);
+      return res.sendStatus(500);
+    });
+});
+
+
 app.get('/user/:id', isAuthenticated, (req,res) => {
   User
     .forge({id: req.params.id})

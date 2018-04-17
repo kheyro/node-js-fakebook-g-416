@@ -80,14 +80,14 @@ const login = (server, opts) => {
 
 const cleanup = () => {
   return Promise.all([
-    Comment.where('id', '!=', 0).destroy(),
-    Post.where('id', '!=', 0).destroy(),
+    Comment.where('id', '!=', 0).destroy({require: false}),
+    Post.where('id', '!=', 0).destroy({require: false}),
     User.where('id', '!=', 0).
       fetchAll({withRelated: ['followers', 'following']})
       .then(coll => {
         return Promise.all([
           _.forEach(coll.models, v => {
-            v.destroy(); 
+            v.destroy({require: false});
           })
         ]);
     })
@@ -102,7 +102,7 @@ let loginData = {
 describe('Server', () => {
 
   after((done) => {
-    return cleanup().then(() => { 
+    cleanup().then(() => {
       done(); 
     }).catch(done);
   });
@@ -287,7 +287,7 @@ describe('Server', () => {
     });
 
     afterEach((done) => {
-      return cleanup().then(() => {
+      cleanup().then(() => {
         done();
       }).catch(done);
     });
@@ -417,7 +417,7 @@ describe('Server', () => {
     });
 
     afterEach((done) => {
-      return cleanup().then(() => {
+      cleanup().then(() => {
         done();
       }).catch(done);
     });

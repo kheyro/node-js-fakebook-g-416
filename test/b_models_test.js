@@ -54,11 +54,12 @@ describe('Models', () => {
 
   let transaction;
 
-  beforeEach((done) => {
-    return db.transaction((trx) => {
-      transaction = trx;
-      return done();
-    }).catch(err => { return; });
+  beforeEach(done => {
+    db.transaction((trx) => {
+        transaction = trx;
+        done();
+      })
+      .catch(err => { return; });
   });
 
   afterEach(() => {

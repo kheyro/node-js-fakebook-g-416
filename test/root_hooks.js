@@ -7,14 +7,16 @@ const expect = chai.expect;
 let server;
 
 before(done => {
-  return app.up().then(_server => {
-    server = _server;
-    done();
-  });
+  app.up()
+    .then(_server => {
+      server = _server;
+      done();
+    })
 });
 
-after(() => {
+after(done => {
   server.close();
+  done();
 });
 
 describe('app', () => {
